@@ -1,11 +1,13 @@
-// AI client — same-origin POST to api.php (the key lives on the server, never here).
+// AI client — same-origin POST to api.php by default (the key lives on the server, never here).
+// Split deploy (Pages frontend + PHP elsewhere): set window.STB_API_URL to the backend URL.
+const API_URL = (typeof window !== 'undefined' && window.STB_API_URL) || 'api.php';
 let currentCtrl=null;
 function apiCancel(){ if(currentCtrl){try{currentCtrl.abort();}catch(_){} currentCtrl=null;} }
 async function apiPost(payload,timeoutMs){
   currentCtrl=new AbortController();
   const t=setTimeout(()=>{try{currentCtrl.abort();}catch(_){}},timeoutMs||100000);
   try{
-    const r=await fetch('api.php',{method:'POST',
+    const r=await fetch(API_URL,{method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload),signal:currentCtrl.signal});
     return await r.json();

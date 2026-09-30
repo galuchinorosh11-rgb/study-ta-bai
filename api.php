@@ -18,6 +18,19 @@ if (!defined('GEMINI_KEY') || GEMINI_KEY === 'PUT-YOUR-GEMINI-KEY-HERE' || GEMIN
     fail('Server is missing its Gemini API key — copy config.example.php to config.php and add the key');
 }
 
+/* ---------- cross-origin: Pages frontend + PHP backend on another host ----------
+   Same-origin installs ignore this. For a split deploy, set ALLOWED_ORIGIN in
+   config.php to the exact frontend origin, e.g. https://YOURNAME.github.io */
+$__origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$__allowed = (defined('ALLOWED_ORIGIN') ? (string)ALLOWED_ORIGIN : '');
+if ($__allowed !== '' && $__origin === $__allowed) {
+    header('Access-Control-Allow-Origin: ' . $__allowed);
+    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    header('Vary: Origin');
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') exit;
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') fail('POST only');
 $in = json_decode(file_get_contents('php://input'), true);
 if (!is_array($in)) fail('Bad JSON body');
